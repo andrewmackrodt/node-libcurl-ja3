@@ -10,8 +10,6 @@
     - [Linting](#linting-1)
   - [Setup](#setup)
   - [Adding New libcurl Options](#adding-new-libcurl-options)
-  - [Changing libcurl Version Used on Prebuilt Binaries for Windows](#changing-libcurl-version-used-on-prebuilt-binaries-for-windows)
-  - [Building Electron](#building-electron)
   - [Debugging with lldb](#debugging-with-lldb)
   - [Publishing New Releases](#publishing-new-releases)
     - [Semver Major / Minor / Patch](#semver-major--minor--patch)
@@ -54,9 +52,9 @@ TS/JS code should be formatted using prettier
 
 ### Setup
 
-If on Windows, first you will need to grab the deps:
+If a pre-built binary is not available you will need to build libcurl-impersonate:
 ```sh
-$ node scripts/update-deps.js
+$ scripts/build.sh
 ```
 
 Install the dependencies, this will also build the addon:
@@ -74,15 +72,7 @@ In case you need to rebuild:
 $ yarn pregyp rebuild
 ```
 
-If on unix and using the build.sh scripts, you also need to provide the path to the curl config file:
-
-```bash
-npm_config_macos_universal_build=true \
-npm_config_curl_config_bin=~/deps/libcurl/build/x.y.z/bin/curl-config \
-yarn pregyp build --debug
-```
-
-If you have any issues with the build process, please refer to a [readme build troubleshooting section](https://github.com/JCMais/node-libcurl#important-notes-on-prebuilt-binaries--direct-installation).
+If you have any issues with the build process, please refer to a [readme build troubleshooting section](https://github.com/andrewmackrodt/node-libcurl-ja3#important-notes-on-prebuilt-binaries--direct-installation).
 
 ### Adding New libcurl Options
 
@@ -98,35 +88,6 @@ If you want to include a new libcurl option on the addon, those are the basic st
   [Full commit with the above changes is available here](https://github.com/JCMais/node-libcurl/commit/a38dd73db6f47a11197b7e1550111cc8ffd9ec2b).
 4. Run `node ./scripts/build-constants.js`, this will generate an updated list of options on [`./lib/generated/`](./lib/generated), and also update the files [`./lib/Curl.ts`] and [`./lib/EasyNativeBinding.ts`] with overloads for the `setOpt` method. Make sure the options added are correct.
 5. If running the above adds extra options that you do not want to add / are not related to the options you are adding, please feel free to remove them manually from the generated output. We will try to improve this experience later, but for now you have to manually remove them.
-
-### Changing libcurl Version Used on Prebuilt Binaries for Windows
-
-You will need to open a PR against the repository [`JCMais/curl-for-windows`](https://github.com/JCMais/curl-for-windows/) upgrading libcurl there.
-
-After that a new tag will be created on this repo, which we can them use on the file [`LIBCURL_VERSION_WIN_DEPS`](./LIBCURL_VERSION_WIN_DEPS).
-
-### Building Electron
-
-Sample command you could use from the root of this repository:
-
-```sh
-LIBCURL_RELEASE=7.78.0 PUBLISH_BINARY="false" ./scripts/ci/build.sh
-
-npm_config_curl_config_bin=~/deps/libcurl/build/7.78.0/bin/curl-config \
- npm_config_curl_static_build=true \
- npm_config_runtime=electron \
- npm_config_target=21.2.0 \
- npm_config_disturl=https://www.electronjs.org/headers \
- yarn pregyp rebuild --debug
-```
-
-You can also use `electron-rebuild`, e.g for macOS:
-```sh
-npm_config_curl_static_build=true \
-npm_config_macos_universal_build=true \
-npm_config_curl_config_bin=~/deps/libcurl/build/7.86.0/bin/curl-config \
-yarn exec electron-rebuild
-```
 
 ### Debugging with lldb
 1. Install lldb
@@ -204,25 +165,7 @@ $ yarn np prerelease --no-yarn --no-cleanup --any-branch --tag next
 
 #### Build Matrix
 
-We are using three CI providers:
-- CircleCI
-- GitHub Actions
-- AppVeyor
-
-Each CI provider is responsible for some builds:
-
-CircleCI:
-- Node.js (Alpine)
-- Electron (linux)
-- NW.js (linux)
-
 GitHub Actions:
 - Node.js (Linux, macOS)
-- Electron (macOS)
-- NW.js (macOS)
 
-AppVeyor:
-- Node.js (Win64, Win32)
-- Electron (Win64, Win32)
-
-GitHub Actions are also used to lint PRs, for that a build runs on Linux.
+~~GitHub Actions are also used to lint PRs, for that a build runs on Linux.~~

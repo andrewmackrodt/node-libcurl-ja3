@@ -13,6 +13,7 @@ export { Easy } from './Easy'
 export { Multi } from './Multi'
 export { Share } from './Share'
 export { curly, CurlyFunction, CurlyResult } from './curly'
+export * from './impersonate'
 
 // enums
 export * from './enum/CurlAuth'

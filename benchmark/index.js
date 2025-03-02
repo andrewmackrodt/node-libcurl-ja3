@@ -1,5 +1,5 @@
 const http = require('http')
-const { curly, Curl, Easy } = require('node-libcurl')
+const { curly, Curl, Easy } = require('node-libcurl-ja3')
 const axios = require('axios')
 const superagent = require('superagent')
 const request = require('request')

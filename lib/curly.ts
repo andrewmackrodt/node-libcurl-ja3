@@ -17,6 +17,12 @@ import { HeaderInfo } from './parseHeaders'
 import { Curl } from './Curl'
 import { CurlFeature } from './enum/CurlFeature'
 
+import {
+  type Browser,
+  type ImpersonateConfig,
+  getCurlOptionsFromBrowser,
+} from './impersonate'
+
 /**
  * Object the curly call resolves to.
  *
@@ -42,7 +48,7 @@ export interface CurlyResult<ResultData = any> {
 }
 
 // This is basically http.METHODS
-const methods = [
+export const methods = [
   'acl',
   'bind',
   'checkout',
@@ -252,6 +258,16 @@ export interface CurlyFunction extends HttpMethodCalls {
   create: (defaultOptions?: CurlyOptions) => CurlyFunction
 
   /**
+   * **EXPERIMENTAL** This API can change between minor releases
+   *
+   * This returns a new `curly` with the specified impersonation options set by default.
+   */
+  impersonate: (
+    browserOrImpersonateConfig: Browser | ImpersonateConfig,
+    defaultOptions: CurlyOptions,
+  ) => CurlyFunction
+
+  /**
    * These are the default response body parsers to be used.
    *
    * By default there are parsers for the following:
@@ -263,7 +279,23 @@ export interface CurlyFunction extends HttpMethodCalls {
   defaultResponseBodyParsers: CurlyResponseBodyParsersProperty
 }
 
-const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
+export function impersonate(
+  browserOrImpersonateConfig: Browser | ImpersonateConfig,
+  defaultOptions: CurlyOptions = {},
+): CurlyFunction {
+  let options: CurlyOptions
+  if (typeof browserOrImpersonateConfig === 'string') {
+    options = {
+      ...defaultOptions,
+      ...getCurlOptionsFromBrowser(browserOrImpersonateConfig),
+    }
+  } else {
+    options = { ...defaultOptions, ...browserOrImpersonateConfig }
+  }
+  return create(options)
+}
+
+export const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
   function curly<ResultData>(
     url: string,
     options: CurlyOptions = {},
@@ -514,6 +546,8 @@ If you want just a single function to handle all content-types, you can use the 
     '*': (data, _headers) => data,
   } as CurlyResponseBodyParsersProperty
 
+  curly.impersonate = impersonate
+
   const httpMethodOptionsMap: Record<
     string,
     null | ((m: string, o: CurlyOptions) => CurlyOptions)
@@ -562,3 +596,5 @@ If you want just a single function to handle all content-types, you can use the 
  * @public
  */
 export const curly = create()
+
+export const defaultResponseBodyParsers = curly.defaultResponseBodyParsers

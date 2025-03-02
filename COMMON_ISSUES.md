@@ -12,7 +12,7 @@ const fs = require('fs')
 const path = require('path')
 const tls = require('tls')
 
-const { curly } = require('node-libcurl')
+const { curly } = require('node-libcurl-ja3')
 
 // important steps
 const certFilePath = path.join(__dirname, 'cert.pem')

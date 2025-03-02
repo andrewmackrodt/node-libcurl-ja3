@@ -1,8 +1,0 @@
-name: "node-libcurl config"
-
-paths:
-  - '/lib' 
-  - '/src' 
-paths-ignore: 
-  - '/test'
-  - '/scripts'

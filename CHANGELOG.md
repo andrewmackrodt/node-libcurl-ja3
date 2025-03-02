@@ -4,13 +4,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [5.0.0] - 2025-03-13
 
-### Breaking Change  
-### Fixed  
+### Breaking Change
+- The prebuilt binaries are only available on: Node.js 20 and 22.
+- Minimum supported Node.js version is now Node.js 20.
+- The only supported Linux architecture is 64-bit (glibc).
+- The only supported macOS architecture is Apple Silicon (M1+).
+- Drop Windows, Electron and NW.js support.
+- Remove `IDN`, `LDAP`, `NTLM_WB`, `SSH`, `TLS-SRP`, `ares`, `scp` and `sftp` from libcurl build.
+
 ### Added
-### Changed  
-### Removed  
+- Added method `curly.impersonate` to construct a new curly instance with impersonation.
+- Added static method `Curl.impersonate` to construct a new Curl instance with impersonation.
+- Add impersonate profiles for:
+  - Chrome 133
+  - Edge 133
+  - Firefox 135
+  - Safari 18.3
+- Add support for the following curl-impersonate options:
+  - `CURLOPT_ECH`
+  - `CURLOPT_HTTP2_PSEUDO_HEADERS_ORDER`
+  - `CURLOPT_HTTP2_SETTINGS`
+  - `CURLOPT_HTTP2_STREAMS`
+  - `CURLOPT_HTTP2_WINDOW_UPDATE`
+  - `CURLOPT_HTTPBASEHEADER`
+  - `CURLOPT_SSL_CERT_COMPRESSION`
+  - `CURLOPT_SSL_ENABLE_ALPS`
+  - `CURLOPT_SSL_ENABLE_TICKET`
+  - `CURLOPT_SSL_PERMUTE_EXTENSIONS`
+  - `CURLOPT_SSL_SIG_HASH_ALGS`
+  - `CURLOPT_STREAM_EXCLUSIVE`
+  - `CURLOPT_TLS_DELEGATED_CREDENTIALS`
+  - `CURLOPT_TLS_EXTENSION_ORDER`
+  - `CURLOPT_TLS_GREASE`
+  - `CURLOPT_TLS_KEY_SHARES_LIMIT`
+  - `CURLOPT_TLS_KEY_USAGE_NO_CHECK`
+  - `CURLOPT_TLS_RECORD_SIZE_LIMIT`
+  - `CURLOPT_TLS_SIGNED_CERT_TIMESTAMPS`
+  - `CURLOPT_TLS_STATUS_REQUEST`
+  - `CURLOPT_TLS_USE_NEW_ALPS_CODEPOINT`
+
+### Changed
+- The libcurl version is always 8.7.1 and compiled statically.
+- libcurl now uses `BoringSSL` in place of `OpenSSL`.
 
 ## [4.1.0] - 2024-12-26
 
@@ -391,7 +428,7 @@ Special Thanks to [@koskokos2](https://github.com/koskokos2) for their contribut
 - Improved code style, started using prettier
 ## [1.2.0] - 2017-08-28
 
-[Unreleased]: https://github.com/JCMais/node-libcurl/compare/v3.0.0...HEAD
+[5.0.0]: https://github.com/JCMais/node-libcurl/compare/v4.1.0...andrewmackrodt:node-libcurl-ja3:v5.0.0
 [3.0.0]: https://github.com/JCMais/node-libcurl/compare/v2.3.4...v3.0.0
 [2.3.4]: https://github.com/JCMais/node-libcurl/compare/v2.3.3...v2.3.4
 [2.3.3]: https://github.com/JCMais/node-libcurl/compare/v2.3.2...v2.3.3

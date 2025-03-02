@@ -12,16 +12,12 @@ import { Readable } from 'stream'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../package.json')
 
-import {
-  NodeLibcurlNativeBinding,
-  EasyNativeBinding,
-  FileInfo,
-  HttpPostField,
-} from './types'
-
+import { EasyNativeBinding, FileInfo, HttpPostField } from './types'
+import { NODE_LIBCURL_BINDING } from './binding'
 import { Easy } from './Easy'
 import { Multi } from './Multi'
 import { Share } from './Share'
+import { type Browser, getCurlOptionsFromBrowser } from './impersonate'
 import { mergeChunks } from './mergeChunks'
 import { parseHeaders, HeaderInfo } from './parseHeaders'
 import {
@@ -68,10 +64,7 @@ import { CurlWriteFunc } from './enum/CurlWriteFunc'
 import { CurlReadFunc } from './enum/CurlReadFunc'
 import { CurlInfoNameSpecific, GetInfoReturn } from './types/EasyNativeBinding'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bindings: NodeLibcurlNativeBinding = require('../lib/binding/node_libcurl.node')
-
-const { Curl: _Curl, CurlVersionInfo } = bindings
+const { Curl: _Curl, CurlVersionInfo } = NODE_LIBCURL_BINDING
 
 if (
   !process.env.NODE_LIBCURL_DISABLE_GLOBAL_INIT_CALL ||
@@ -1099,6 +1092,16 @@ class Curl extends EventEmitter {
     this.emit('header', chunk, this)
 
     return size * nmemb
+  }
+
+  static impersonate(browser: Browser) {
+    const handle = new Curl()
+    const curlOptions = getCurlOptionsFromBrowser(browser)
+    for (const [option, value] of Object.entries(curlOptions)) {
+      // @ts-expect-error todo make type safe
+      handle.setOpt(option, value)
+    }
+    return handle
   }
 
   /**

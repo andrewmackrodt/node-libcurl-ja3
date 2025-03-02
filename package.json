@@ -1,25 +1,25 @@
 {
-  "name": "node-libcurl",
-  "version": "4.1.0",
-  "description": "The fastest http(s) client (and much more) for Node.js - Node.js bindings for libcurl",
+  "name": "node-libcurl-ja3",
+  "version": "5.0.0",
+  "description": "The fastest http(s) client (and much more) for Node.js - Node.js bindings for libcurl-impersonate",
   "keywords": [
     "node-curl",
+    "node-curl-impersonate",
     "curl",
+    "curl-impersonate",
     "libcurl",
     "node-libcurl",
+    "node-libcurl-ja3",
     "axios",
     "request"
   ],
-  "homepage": "https://github.com/JCMais/node-libcurl",
-  "bugs": {
-    "url": "https://github.com/JCMais/node-libcurl/issues"
-  },
+  "homepage": "https://github.com/andrewmackrodt/node-libcurl-ja3",
   "repository": {
     "type": "git",
-    "url": "git://github.com/JCMais/node-libcurl.git"
+    "url": "git://github.com/andrewmackrodt/node-libcurl-ja3.git"
   },
   "license": "MIT",
-  "author": "Jonathan Cardoso <me@jonathancardoso.com>",
+  "author": "Andrew Mackrodt <andrewmackrodt@gmail.com>",
   "type": "commonjs",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -27,15 +27,14 @@
     "binding.gyp",
     "dist",
     "scripts",
-    "src",
-    "LIBCURL_VERSION_WIN_DEPS"
+    "src"
   ],
   "binary": {
-    "module_name": "node_libcurl",
-    "module_path": "./lib/binding/",
-    "remote_path": "./v{version}/",
-    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}-{libc}.tar.gz",
-    "host": "https://github.com/JCMais/node-libcurl/releases/download"
+    "module_name": "node_libcurl_ja3",
+    "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}",
+    "remote_path": "v{version}",
+    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
+    "host": "https://github.com/andrewmackrodt/node-libcurl-ja3/releases/download"
   },
   "scripts": {
     "ae": "api-extractor run --local --verbose",
@@ -50,7 +49,7 @@
     "gen:compile_commands:debug": "yarn pregyp -- configure --debug -- --format=\"gyp.generator.compile_commands_json.py\"",
     "gen:compile_commands:release": "yarn pregyp -- configure --release -- --format=\"gyp.generator.compile_commands_json.py\"",
     "gen:constants": "node scripts/build-constants.js",
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "scripts/install.sh",
     "postinstall": "node scripts/postinstall",
     "lint": "eslint lib/ scripts/ test/ examples/",
     "pregyp": "node-pre-gyp",
@@ -86,7 +85,6 @@
   },
   "devDependencies": {
     "@commitlint/cli": "18.4.3",
-    "@electron/rebuild": "^3.7.1",
     "@microsoft/api-documenter": "7.23.12",
     "@microsoft/api-extractor": "7.38.3",
     "@octokit/rest": "^20.0.2",
@@ -100,7 +98,6 @@
     "cheerio": "1.0.0-rc.3",
     "clang-format": "1.8.0",
     "cookie-parser": "1.4.7",
-    "electron": "33.2.1",
     "eslint": "8.55.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-formatter-friendly": "7.0.0",
@@ -128,9 +125,14 @@
     "typescript": "5.3.2",
     "vitest": "2.1.8"
   },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "engines": {
-    "node": ">=16.14"
+    "node": ">=20"
   },
+  "os": [
+    "darwin",
+    "linux"
+  ],
   "np": {
     "cleanup": false
   }

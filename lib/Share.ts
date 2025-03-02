@@ -4,11 +4,8 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { NodeLibcurlNativeBinding } from './types'
+import { NODE_LIBCURL_BINDING } from './binding'
 import { CurlShareOption } from './enum/CurlShareOption'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bindings: NodeLibcurlNativeBinding = require('../lib/binding/node_libcurl.node')
 
 /**
  * This is a Node.js wrapper around the binding {@link EasyNativeBinding | native Easy class}.
@@ -17,7 +14,7 @@ const bindings: NodeLibcurlNativeBinding = require('../lib/binding/node_libcurl.
  *
  * @public
  */
-class Share extends bindings.Share {
+class Share extends NODE_LIBCURL_BINDING.Share {
   /**
    * Options to be used with {@link setOpt | `setOpt`}.
    *

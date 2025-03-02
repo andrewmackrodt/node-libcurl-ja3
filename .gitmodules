@@ -1,5 +1,3 @@
-[submodule "deps/curl-for-windows"]
-	path = deps/curl-for-windows
-	url = https://github.com/JCMais/curl-for-windows.git
-	ignore = dirty
-	branch = master
+[submodule "deps/curl-impersonate"]
+	path = deps/curl-impersonate
+	url = https://github.com/lexiforest/curl-impersonate.git

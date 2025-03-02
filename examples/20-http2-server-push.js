@@ -8,7 +8,13 @@
 const fs = require('fs')
 const path = require('path')
 
-const { Curl, CurlPush, Easy, Multi, CurlHttpVersion } = require('node-libcurl')
+const {
+  Curl,
+  CurlPush,
+  Easy,
+  Multi,
+  CurlHttpVersion,
+} = require('node-libcurl-ja3')
 
 console.log(Curl.getVersionInfoString())
 

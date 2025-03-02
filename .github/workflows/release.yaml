@@ -1,0 +1,258 @@
+name: release
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+      - v[0-9]+.[0-9]+.[0-9]+-beta.[0-9]+
+      - v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+
+
+permissions:
+  contents: write
+
+env:
+  PRIMARY_NODE_VERSION: 20
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.PRIMARY_NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.PRIMARY_NODE_VERSION }}
+          cache: yarn
+
+      - name: Yarn
+        run: yarn install --ignore-scripts
+
+      - name: ESLint
+        run: yarn lint
+
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-15
+          - ubuntu-22.04
+        node:
+          - 20
+          - 22
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - name: Prepare environment
+        id: prepare-env
+        run: |
+          # make directories
+          mkdir -p deps/curl-impersonate/build
+
+          # define variables
+          os=$(node -e 'console.log(process.platform)')
+          arch=$(node -e 'console.log(process.arch)')
+
+          cd deps/curl-impersonate
+          curl_impersonate_commit=$(git rev-parse HEAD)
+          curl_impersonate_tag=$(git describe --abbrev=0 --tags 2>/dev/null | sed -E 's/^v([0-9]+)\./\1./' || echo '')
+          curl_impersonate_ref=$curl_impersonate_tag
+          if [[ "$curl_impersonate_ref" == "" ]]; then
+            curl_impersonate_ref=${curl_impersonate_commit:0:7}
+          fi
+          curl_impersonate_cache_key="build-cache-${{ runner.os }}-$arch-curl-impersonate-$curl_impersonate_commit"
+          curl_impersonate_artifact="curl-impersonate-$curl_impersonate_ref-$os-$arch"
+          cd - >/dev/null
+
+          tag=$(git describe --abbrev=0 --tags 2>/dev/null | sed -E 's/^v([0-9]+)\./\1./' || echo '')
+          pkgver=$(sed -nE 's/.*"version": *"([^"]+)".*/\1/p' package.json)
+          
+          if [[ "$tag" != "$pkgver" ]]; then
+            echo "error: tag differs from package.json version ($tag != $pkgver)" >&2
+            exit 1
+          fi
+
+          node_abi="node-v$(node -e 'console.log(process.versions.modules)')"
+          binding_artifact=node_libcurl_ja3-v$pkgver-$node_abi-$os-$arch
+
+          # write variables to parse as output
+          cat <<EOF >> "$GITHUB_OUTPUT"
+          curl_impersonate_cache_key=$curl_impersonate_cache_key
+          curl_impersonate_artifact=$curl_impersonate_artifact
+          pkgver=$pkgver
+          binding_artifact=$binding_artifact
+          package_artifact=node-libcurl-ja3-v$pkgver
+          EOF
+
+      # changes timestamps for files in the curl-impersonate submodule to their git mtime
+      # to allow the build cache to work, else it will think all files have been modified
+      - name: Restore curl-impersonate timestamps
+        uses: chetan/git-restore-mtime-action@v2
+        with:
+          working-directory: deps/curl-impersonate
+
+      - name: Restore curl-impersonate build cache
+        id: libcurl-build-cache
+        uses: actions/cache@v4
+        with:
+          path: deps/curl-impersonate/build
+          key: ${{ steps.prepare-env.outputs.curl_impersonate_cache_key }}
+
+      - if: runner.os == 'Linux'
+        name: Install build packages on Linux
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo -E apt update -qqy
+          sudo -E apt install -qqy autoconf automake build-essential cmake curl libtool ninja-build pkg-config
+
+      - if: runner.os == 'macOS'
+        name: Install build packages on macOS
+        run: brew install automake bash libtool make meson ninja
+
+      - name: Yarn
+        run: npm_config_build_from_source=true yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build:dist
+
+      - name: Get curl-impersonate version
+        run: |
+          deps/curl-impersonate/build/curl-impersonate/bin/curl-impersonate-chrome --version | grep -v unreleased | sed -E 's/^(curl [^ ]+) \([^)]+\)/Versions: \1/'
+
+      - if: runner.os == 'Linux'
+        name: Check Linux binary does not dynamically link libraries
+        run: |
+          libs=$(
+            ldd deps/curl-impersonate/build/curl-impersonate/bin/curl-impersonate-chrome \
+              | sed -nE 's/\s*(.+?)\.so(\.[0-9]+)? => .+/\1/p' \
+              | grep -wvE 'libc|libgcc_s|libm|libstdc\+\+' \
+              | tr $'\n' ' ' | sed -E 's/ +$//' \
+            )
+          if [[ "$libs" != "" ]]; then
+            echo "error: unexpected linked libraries: $libs" >&2
+            exit 1
+          fi
+
+      - if: runner.os == 'macOS'
+        name: Check macOS binary does not dynamically link libraries
+        run: |
+          libs=$(
+            otool -L deps/curl-impersonate/build/curl-impersonate/bin/curl-impersonate-chrome \
+              | sed -nE 's/\t(.+) \(.+/\1/p' \
+              | grep -vE '^(/System/Library/|/usr/lib/)' \
+              | tr $'\n' ' ' | sed -E 's/ +$//' \
+            )
+          if [[ "$libs" != "" ]]; then
+            echo "error: unexpected linked libraries: $libs" >&2
+            exit 1
+          fi
+
+      - name: Pretest
+        run: yarn test --testNamePattern='^Browser Impersonation' test/curl/impersonate.spec.ts
+
+      - name: Rename curl-impersonate build tarball
+        run: mv deps/curl-impersonate/build/curl-impersonate.tar.gz 'build/${{ steps.prepare-env.outputs.curl_impersonate_artifact }}.tar.gz'
+
+      - if: matrix.node == '20'
+        name: Upload curl-impersonate build tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prepare-env.outputs.curl_impersonate_artifact }}.tar.gz
+          path: build/${{ steps.prepare-env.outputs.curl_impersonate_artifact }}.tar.gz
+          if-no-files-found: error
+
+      - name: Delete curl-impersonate build tarball
+        run: rm -f build/${{ steps.prepare-env.outputs.curl_impersonate_artifact }}.tar.gz
+
+      - name: Create native binding tarball
+        run: tar zcf build/${{ steps.prepare-env.outputs.binding_artifact }}.tar.gz -C lib/binding/Release $(ls lib/binding/Release)
+
+      - name: Upload native binding tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prepare-env.outputs.binding_artifact }}.tar.gz
+          path: build/${{ steps.prepare-env.outputs.binding_artifact }}.tar.gz
+          if-no-files-found: error
+
+      - if: runner.os == 'Linux' && matrix.node == '20'
+        name: Create package tarball
+        run: |
+          npm pack
+          pkgver='${{ steps.prepare-env.outputs.pkgver }}'
+          tar xf "node-libcurl-ja3-$pkgver.tgz" -C build
+          rm -f "node-libcurl-ja3-$pkgver.tgz"
+          cd build
+          mv package node-libcurl-ja3
+          tar zcf '${{ steps.prepare-env.outputs.package_artifact }}.tar.gz' node-libcurl-ja3
+
+      - if: runner.os == 'Linux' && matrix.node == '20'
+        name: Upload package tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prepare-env.outputs.package_artifact }}.tar.gz
+          path: build/${{ steps.prepare-env.outputs.package_artifact }}.tar.gz
+          if-no-files-found: error
+
+      - name: Test
+        run: yarn test
+
+  gh-release:
+    needs:
+      - lint
+      - build-and-test
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Prepare environment
+        id: prepare-env
+        run: |
+          # extract release version
+          pkgver=$(sed -nE 's/.*"version": *"([^"]+)".*/\1/p' package.json)
+
+          # extract changelog
+          changelog_file=$(mktemp)
+          scripts/changelog.sh "$pkgver" >"$changelog_file"
+
+          # determine if prerelease
+          is_prerelease=false
+          if echo "$pkgver" | grep -qE '[-](beta|rc)\b'; then
+            is_prerelease=true
+          fi
+
+          # write variables to parse as output
+          cat <<EOF >> "$GITHUB_OUTPUT"
+          changelog_file=$changelog_file
+          is_prerelease=$is_prerelease
+          EOF
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ steps.prepare-env.outputs.changelog_file }}
+          draft: true
+          prerelease: ${{ steps.prepare-env.outputs.is_prerelease }} == 'true'
+          files: artifacts/**/*.tar.gz
+          fail_on_unmatched_files: true
+          generate_release_notes: false

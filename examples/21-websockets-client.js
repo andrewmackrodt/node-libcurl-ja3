@@ -30,7 +30,8 @@
 
 const os = require('os')
 
-const { CurlCode, Easy, Multi, SocketState } = require('node-libcurl')
+const { CurlCode, Easy, Multi, SocketState } = require('node-libcurl-ja3')
+
 const {
   packCloseFrame,
   packMessageFrame,

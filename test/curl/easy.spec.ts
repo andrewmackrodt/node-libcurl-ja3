@@ -9,7 +9,7 @@ import { describe, beforeEach, afterEach, it, expect } from 'vitest'
 import { Curl, CurlCode, Easy } from '../../lib'
 import { withCommonTestOptions } from '../helper/commonOptions'
 
-const url = 'http://example.com/'
+const url = 'https://httpstat.us/200'
 
 // This is the only test that does not uses a express server
 // It makes a request to a live server, which can cause issues if there are network problems
@@ -92,7 +92,7 @@ describe('easy', () => {
       'TRAILERFUNCTION - should rethrow error',
       () => {
         curl.setOpt('UPLOAD', true)
-        curl.setOpt('HTTPHEADER', ['x-random-header: random-value'])
+        curl.setOpt('HTTPHEADER', ['TE: trailers'])
         // @ts-ignore
         curl.setOpt('TRAILERFUNCTION', () => {
           throw new Error('Error thrown on callback')
@@ -113,7 +113,7 @@ describe('easy', () => {
       'TRAILERFUNCTION - should throw error if has invalid return type',
       () => {
         curl.setOpt('UPLOAD', true)
-        curl.setOpt('HTTPHEADER', ['x-random-header: random-value'])
+        curl.setOpt('HTTPHEADER', ['TE: trailers'])
         // @ts-ignore
         curl.setOpt('TRAILERFUNCTION', () => {
           return {}

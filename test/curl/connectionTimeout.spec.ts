@@ -14,7 +14,7 @@ describe('Connection Timeout', () => {
     withCommonTestOptions(curl)
 
     // http://stackoverflow.com/a/904609/710693
-    curl.setOpt('URL', '10.255.255.1')
+    curl.setOpt('URL', '172.31.255.255')
     curl.setOpt('CONNECTTIMEOUT', 1)
 
     await new Promise<void>((resolve, reject) => {

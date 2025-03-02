@@ -11,7 +11,7 @@ describe('issues', () => {
         const curl = new Curl()
         withCommonTestOptions(curl)
 
-        curl.setOpt('URL', '10.255.255.1')
+        curl.setOpt('URL', '172.31.255.255')
         curl.setOpt('CONNECTTIMEOUT', 1)
         curl.setOpt('TIMEOUT', 1)
 

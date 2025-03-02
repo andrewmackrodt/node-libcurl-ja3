@@ -12,7 +12,7 @@
  */
 const path = require('path')
 
-const { Curl, CurlFeature } = require('node-libcurl')
+const { Curl, CurlFeature } = require('node-libcurl-ja3')
 
 const protobuf = require('protobufjs')
 

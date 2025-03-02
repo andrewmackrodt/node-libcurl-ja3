@@ -4,10 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import { NodeLibcurlNativeBinding } from './types'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const bindings: NodeLibcurlNativeBinding = require('../lib/binding/node_libcurl.node')
+import { NODE_LIBCURL_BINDING } from './binding'
 
 /**
  * This is a Node.js wrapper around the binding {@link MultiNativeBinding | native Multi class}.
@@ -16,7 +13,7 @@ const bindings: NodeLibcurlNativeBinding = require('../lib/binding/node_libcurl.
  *
  * @public
  */
-class Multi extends bindings.Multi {
+class Multi extends NODE_LIBCURL_BINDING.Multi {
   /**
    * Options to be used with {@link setOpt | `setOpt`}.
    *
@@ -25,7 +22,7 @@ class Multi extends bindings.Multi {
    *
    * `CURLMOPT_MAXCONNECTS` becomes `Multi.option.MAXCONNECTS`
    */
-  static option = bindings.Curl.multi
+  static option = NODE_LIBCURL_BINDING.Curl.multi
 }
 
 export { Multi }

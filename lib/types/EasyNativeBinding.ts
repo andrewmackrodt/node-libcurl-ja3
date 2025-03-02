@@ -59,7 +59,7 @@ export type CurlInfoNameSpecific = 'CERTINFO'
  *
  * It can be used by itself, in a synchronous way:
  * ```javascript
- * import { Curl, CurlCode, Easy } from 'node-libcurl'
+ * import { Curl, CurlCode, Easy } from 'node-libcurl-ja3'
  * import { StringDecoder } from 'string_decoder'
  *
  * const decoder = new StringDecoder('utf8')
