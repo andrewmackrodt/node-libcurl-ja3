@@ -30,7 +30,7 @@ if [[ "$start" == "" ]]; then
 fi
 
 if [[ "$end" == "" ]]; then
-  tail -n+$start "$CHANGELOG" | perl -0777 -pe 's/\n{2,}$/\n/m'
+  tail -n+$((start + 1)) "$CHANGELOG" | perl -0777 -pe 's/\n{2,}$/\n/'
 else
-  head -n$((end - 1)) "$CHANGELOG" | tail -n+$start | perl -0777 -pe 's/\n{2,}$/\n/m'
+  head -n$((end - 1)) "$CHANGELOG" | tail -n+$((start + 1)) | perl -0777 -pe 's/^\n+//' | perl -0777 -pe 's/\n{2,}$/\n/'
 fi
