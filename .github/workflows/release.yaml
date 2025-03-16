@@ -68,7 +68,7 @@ jobs:
 
           cd deps/curl-impersonate
           curl_impersonate_commit=$(git rev-parse HEAD)
-          curl_impersonate_tag=$(git describe --abbrev=0 --tags 2>/dev/null | sed -E 's/^v([0-9]+)\./\1./' || echo '')
+          curl_impersonate_tag=$(git describe --abbrev=0 --tags 2>/dev/null | sed -E 's/^(v?[0-9]+)\./\1./' || echo '')
           curl_impersonate_ref=$curl_impersonate_tag
           if [[ "$curl_impersonate_ref" == "" ]]; then
             curl_impersonate_ref=${curl_impersonate_commit:0:7}
