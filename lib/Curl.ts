@@ -1023,9 +1023,8 @@ class Curl extends EventEmitter {
             if (handle.streamWriteFunctionFirstRun) {
               handle.streamWriteFunctionFirstRun = false
             }
-            // we must allow Node.js to process the whole event queue
-            // before we unpause
-            setImmediate(() => {
+            // uses setImmediate in upstream but causes issues with HTTP2 streams in fork
+            process.nextTick(() => {
               if (handle.isRunning) {
                 handle.streamWriteFunctionPaused = false
                 handle.pause(CurlPause.RecvCont)
