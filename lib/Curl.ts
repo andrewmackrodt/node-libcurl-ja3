@@ -258,8 +258,8 @@ class Curl extends EventEmitter {
   protected streamWriteFunctionHighWaterMark: number | undefined
   protected streamWriteFunctionShouldPause = false
   protected streamWriteFunctionPaused = false
-  protected streamWriteFunctionFirstRun = true
   // common
+  protected isHttp2Stream = true
   protected streamPauseNext = false
   protected streamContinueNext = false
   protected streamError: false | Error = false
@@ -886,8 +886,8 @@ class Curl extends EventEmitter {
     // WRITEFUNCTION / download related
     this.streamWriteFunctionShouldPause = false
     this.streamWriteFunctionPaused = false
-    this.streamWriteFunctionFirstRun = true
     // common
+    this.isHttp2Stream = true
     this.streamPauseNext = false
     this.streamContinueNext = false
     this.streamError = false
@@ -1016,16 +1016,9 @@ class Curl extends EventEmitter {
           })
         },
         read(_size) {
-          if (
-            handle.streamWriteFunctionFirstRun ||
-            handle.streamWriteFunctionPaused
-          ) {
-            if (handle.streamWriteFunctionFirstRun) {
-              handle.streamWriteFunctionFirstRun = false
-            }
-            // uses setImmediate in upstream but causes issues with HTTP2 streams in fork
-            process.nextTick(() => {
-              if (handle.isRunning) {
+          if (handle.streamWriteFunctionPaused) {
+            setImmediate(() => {
+              if (handle.isRunning && handle.streamWriteFunctionPaused) {
                 handle.streamWriteFunctionPaused = false
                 handle.pause(CurlPause.RecvCont)
               }
@@ -1052,12 +1045,21 @@ class Curl extends EventEmitter {
       // let's emit the event only in the next iteration of the event loop
       // We need to do this otherwise the event listener callbacks would run
       // before the pause below, and this is probably not what we want.
-      setImmediate(() =>
+      process.nextTick(() =>
         this.emit('stream', this.writeFunctionStream, status, headers, this),
       )
 
-      this.streamWriteFunctionPaused = true
-      return CurlWriteFunc.Pause
+      this.isHttp2Stream =
+        (
+          (headers[0] as Record<string, unknown>)?.result as Record<
+            string,
+            unknown
+          >
+        )?.version === 'HTTP/2'
+
+      if (!this.isHttp2Stream) {
+        this.streamWriteFunctionShouldPause = true
+      }
     }
 
     // pause this req
@@ -1070,8 +1072,8 @@ class Curl extends EventEmitter {
     // write to the stream
     const ok = this.writeFunctionStream.push(chunk)
 
-    // pause connection until there is more data
-    if (!ok) {
+    // pause connection until buffer is less than highWatermark
+    if (!ok && !this.isHttp2Stream) {
       this.streamWriteFunctionPaused = true
       this.pause(CurlPause.Recv)
     }
