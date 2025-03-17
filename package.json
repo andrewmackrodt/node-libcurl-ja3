@@ -1,17 +1,16 @@
 {
   "name": "node-libcurl-ja3",
   "version": "5.0.1",
-  "description": "The fastest http(s) client (and much more) for Node.js - Node.js bindings for libcurl-impersonate",
+  "description": "Node.js native bindings for libcurl-impersonate. Impersonate Chrome, Edge, Firefox and Safari TLS fingerprints.",
   "keywords": [
-    "node-curl",
-    "node-curl-impersonate",
+    "boringssl",
     "curl",
     "curl-impersonate",
+    "ja3",
     "libcurl",
-    "node-libcurl",
-    "node-libcurl-ja3",
-    "axios",
-    "request"
+    "libcurl-impersonate",
+    "tls-fingerprinting",
+    "web-scraping"
   ],
   "homepage": "https://github.com/andrewmackrodt/node-libcurl-ja3",
   "repository": {
