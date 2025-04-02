@@ -21,6 +21,7 @@ import {
   type Browser,
   type ImpersonateConfig,
   getCurlOptionsFromBrowser,
+  getCurlOptionsFromBrowserConfig,
 } from './impersonate'
 
 /**
@@ -264,7 +265,7 @@ export interface CurlyFunction extends HttpMethodCalls {
    */
   impersonate: (
     browserOrImpersonateConfig: Browser | ImpersonateConfig,
-    defaultOptions: CurlyOptions,
+    defaultOptions?: CurlyOptions,
   ) => CurlyFunction
 
   /**
@@ -290,7 +291,10 @@ export function impersonate(
       ...getCurlOptionsFromBrowser(browserOrImpersonateConfig),
     }
   } else {
-    options = { ...defaultOptions, ...browserOrImpersonateConfig }
+    options = {
+      ...defaultOptions,
+      ...getCurlOptionsFromBrowserConfig(browserOrImpersonateConfig),
+    }
   }
   return create(options)
 }

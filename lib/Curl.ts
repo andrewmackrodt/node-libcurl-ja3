@@ -17,7 +17,12 @@ import { NODE_LIBCURL_BINDING } from './binding'
 import { Easy } from './Easy'
 import { Multi } from './Multi'
 import { Share } from './Share'
-import { type Browser, getCurlOptionsFromBrowser } from './impersonate'
+import {
+  type Browser,
+  getCurlOptionsFromBrowser,
+  getCurlOptionsFromBrowserConfig,
+  type ImpersonateConfig,
+} from './impersonate'
 import { mergeChunks } from './mergeChunks'
 import { parseHeaders, HeaderInfo } from './parseHeaders'
 import {
@@ -1095,10 +1100,15 @@ class Curl extends EventEmitter {
     return size * nmemb
   }
 
-  static impersonate(browser: Browser) {
+  static impersonate(browserOrImpersonateConfig: Browser | ImpersonateConfig) {
+    let options: CurlOptionValueType
+    if (typeof browserOrImpersonateConfig === 'string') {
+      options = getCurlOptionsFromBrowser(browserOrImpersonateConfig)
+    } else {
+      options = getCurlOptionsFromBrowserConfig(browserOrImpersonateConfig)
+    }
     const handle = new Curl()
-    const curlOptions = getCurlOptionsFromBrowser(browser)
-    for (const [option, value] of Object.entries(curlOptions)) {
+    for (const [option, value] of Object.entries(options)) {
       // @ts-expect-error todo make type safe
       handle.setOpt(option, value)
     }
