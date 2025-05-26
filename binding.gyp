@@ -30,7 +30,7 @@
           ],
           'libraries': [
             '-L<(build_dir)/lib',
-            '<!@(<(build_dir)/bin/curl-impersonate-chrome-config --static-libs)',
+            '<!@(<(build_dir)/bin/curl-impersonate-config --static-libs)',
           ]
         }],
         ['OS=="mac"', {
@@ -46,11 +46,11 @@
               # This seems to be required starting with xcode 12
               # original workaround from https://github.com/JCMais/node-libcurl/pull/312
               '-static',
-              '<!@(<(build_dir)/bin/curl-impersonate-chrome-config --static-libs | sed "s/-framework CoreFoundation//")',
+              '<!@(<(build_dir)/bin/curl-impersonate-config --static-libs | sed "s/-framework CoreFoundation//")',
             ],
 
             'LD_RUNPATH_SEARCH_PATHS': [
-              '<!@(<(build_dir)/bin/curl-impersonate-chrome-config --static-libs | node -e "console.log(require(\'fs\').readFileSync(0, \'utf-8\').split(\' \').filter(i => i.startsWith(\'-L\')).join(\' \').replace(/-L/g, \'\'))")'
+              '<!@(<(build_dir)/bin/curl-impersonate-config --static-libs | node -e "console.log(require(\'fs\').readFileSync(0, \'utf-8\').split(\' \').filter(i => i.startsWith(\'-L\')).join(\' \').replace(/-L/g, \'\'))")'
             ],
           },
         }],
