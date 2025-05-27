@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - '**'
+  workflow_dispatch:
 
 env:
   PRIMARY_NODE_VERSION: 20
