@@ -115,11 +115,14 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           sudo -E apt update -qqy
           sudo -E apt install -qqy autoconf automake build-essential cmake curl libtool ninja-build pkg-config
-          sudo -E apt install -qqy zstd libzstd-devel
+          sudo -E apt install -qqy zstd libzstd-dev
 
       - if: runner.os == 'macOS'
         name: Install build packages on macOS
-        run: brew install automake bash libtool make meson ninja zstd
+        run: |
+          brew install automake bash libtool make meson ninja
+          brew install zstd
+          export LDFLAGS="-L$(brew --prefix zstd)/lib"
 
       - name: Yarn
         run: npm_config_build_from_source=true yarn install --frozen-lockfile
