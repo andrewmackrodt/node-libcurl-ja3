@@ -48,6 +48,7 @@ fi
 
 # Build BoringSSL
 build_boringssl() {
+  export CFLAGS="-fPIC"
   $MAKE build
 }
 
@@ -117,6 +118,7 @@ configure_build() {
 
 # Build Curl Impersonate
 build_curl_impersonate() {
+  export CFLAGS="-fPIC"
   $MAKE build
   $MAKE checkbuild
   $MAKE install
