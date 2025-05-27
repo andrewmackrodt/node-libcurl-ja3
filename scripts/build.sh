@@ -9,9 +9,28 @@ SRC_ARTIFACTS_FILE="$BUILD_DIR/curl-impersonate.src.tar.gz"
 BUILD_ARTIFACTS_FILE="$BUILD_DIR/curl-impersonate.tar.gz"
 OS=$(uname -s)
 
+BORINGSSL_COMMIT="673e61fc215b178a90c0e67858bbf162c8158993"
+BORINGSSL_SRC_DIR="$BUILD_DIR/boringssl-$BORINGSSL_COMMIT"
+
+BROTLI_VERSION="1.1.0"
+BROTLI_SRC_DIR="$BUILD_DIR/brotli-$BROTLI_VERSION"
+BROTLI_OUT_DIR="$BROTLI_SRC_DIR/out/installed"
+
 CURL_VERSION="8_13_0"
 CURL_SRC_DIR="$BUILD_DIR/curl-$CURL_VERSION"
 CURL_OUT_DIR="$BUILD_DIR/curl-impersonate"
+
+NGHTTP2_VERSION="1.63.0"
+NGHTTP2_SRC_DIR="$BUILD_DIR/nghttp2-$NGHTTP2_VERSION"
+NGHTTP2_OUT_DIR="$NGHTTP2_SRC_DIR/installed"
+
+ZLIB_VERSION="1.3"
+ZLIB_SRC_DIR="$BUILD_DIR/zlib-$ZLIB_VERSION"
+ZLIB_OUT_DIR="$ZLIB_SRC_DIR/installed"
+
+ZSTD_VERSION="1.5.6"
+ZSTD_SRC_DIR="$BUILD_DIR/zstd-$ZSTD_VERSION"
+ZSTD_OUT_DIR="$ZSTD_SRC_DIR/installed"
 
 # Determine OS-specific variables
 if [ "$OS" = "Linux" ]; then
@@ -26,6 +45,44 @@ else
   echo "Unsupported operating system: $OS"
   exit 1
 fi
+
+# Build BoringSSL
+build_boringssl() {
+  $MAKE chrome-build
+}
+
+# Build zlib
+build_zlib() {
+  if [[ ! -d "$ZLIB_SRC_DIR" ]]; then
+    curl -LO "https://zlib.net/fossils/zlib-$ZLIB_VERSION.tar.gz"
+    tar xf "zlib-$ZLIB_VERSION.tar.gz"
+  fi
+  cd "$ZLIB_SRC_DIR"
+  CHOST=$HOST CFLAGS="-fPIC" ./configure --prefix="$ZLIB_OUT_DIR"
+  make
+  make install
+  rm -f "$ZLIB_OUT_DIR/lib/libz.so"
+  cd ..
+}
+
+# Build zstd
+build_zstd() {
+  if [[ ! -d "$ZSTD_SRC_DIR" ]]; then
+    curl -LO "https://github.com/facebook/zstd/releases/download/v$ZSTD_VERSION/zstd-$ZSTD_VERSION.tar.gz"
+    tar xf "zstd-$ZSTD_VERSION.tar.gz"
+  fi
+  cd "$ZSTD_SRC_DIR"
+  if [[ "$OS" == "Linux" ]]; then
+    make
+    make install PREFIX="$ZSTD_OUT_DIR"
+  else
+    meson setup -Dbin_programs=false -Dstatic_runtime=true -Ddefault_library=static --prefix="$ZSTD_OUT_DIR" --reconfigure build/meson out
+    ninja -C out
+    ninja -C out install
+  fi
+  rm -f "$ZSTD_OUT_DIR/lib/libzstd.so"
+  cd ..
+}
 
 # Configure
 configure_build() {
@@ -52,7 +109,9 @@ configure_build() {
     | sed -E 's/(add_libs=.+)/\1\n\t  config_flags="$$config_flags '"${extra_config_flags[*]}"'"; \\/' \
     | tee "$CURL_IMPERSONATE_DIR/Makefile.in" >/dev/null
   "$CURL_IMPERSONATE_DIR/configure" --prefix="$CURL_OUT_DIR" \
-    --enable-static
+    --enable-static \
+    --with-zlib="$ZLIB_OUT_DIR" \
+    --with-zstd="$ZSTD_OUT_DIR"
   mv "$CURL_IMPERSONATE_DIR/Makefile.in.bak" "$CURL_IMPERSONATE_DIR/Makefile.in"
 }
 
@@ -110,9 +169,21 @@ main() {
   mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
 
+  # Build zlib
+  echo "Building zlib..."
+  build_zlib
+
+  # Build zstd
+  echo "Building zstd..."
+  build_zstd
+
   # Configure
   echo "Configuring build..."
   configure_build
+
+  # Build boringssl
+  echo "Building boringssl..."
+  build_boringssl
 
   # Build curl impersonate
   echo "Building Curl Impersonate..."
