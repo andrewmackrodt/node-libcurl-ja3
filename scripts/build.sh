@@ -48,7 +48,7 @@ fi
 
 # Build BoringSSL
 build_boringssl() {
-  $MAKE chrome-build
+  $MAKE build
 }
 
 # Build zlib
