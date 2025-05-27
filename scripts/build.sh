@@ -48,7 +48,6 @@ fi
 
 # Build BoringSSL
 build_boringssl() {
-  export CFLAGS="-fPIC"
   $MAKE build
 }
 
@@ -118,7 +117,6 @@ configure_build() {
 
 # Build Curl Impersonate
 build_curl_impersonate() {
-  export CFLAGS="-fPIC"
   $MAKE build
   $MAKE checkbuild
   $MAKE install
@@ -170,6 +168,7 @@ main() {
   # Create install directory
   mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
+  export CFLAGS="-fPIC"
 
   # Build zlib
   echo "Building zlib..."
