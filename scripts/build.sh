@@ -54,8 +54,8 @@ build_boringssl() {
 # Build zlib
 build_zlib() {
   if [[ ! -d "$ZLIB_SRC_DIR" ]]; then
-    curl -LO "https://zlib.net/fossils/zlib-$ZLIB_VERSION.tar.gz"
-    tar xf "zlib-$ZLIB_VERSION.tar.gz"
+    curl -LO "https://github.com/madler/zlib/archive/refs/tags/v$ZLIB_VERSION.tar.gz"
+    tar xf "v$ZLIB_VERSION.tar.gz"
   fi
   cd "$ZLIB_SRC_DIR"
   CHOST=$HOST CFLAGS="-fPIC" ./configure --prefix="$ZLIB_OUT_DIR"
