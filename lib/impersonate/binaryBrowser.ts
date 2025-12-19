@@ -72,7 +72,8 @@ export function create(browser: Browser): CurlyFunction {
 
     args.push(url)
 
-    const curlCommand = path.resolve(`${curlDir}/curl_${browser}`)
+    const binName = 'curl_' + browser.replace(/_/g, '')
+    const curlCommand = path.resolve(`${curlDir}/${binName}`)
     const command = `${curlCommand} ${args.join(' ')}`
 
     return new Promise((resolve, reject) => {

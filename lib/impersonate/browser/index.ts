@@ -57,7 +57,7 @@ export function getCurlOptionsFromBrowserConfig(
 
   if (config.tlsVersion) {
     let tlsVersion = config.tlsVersion
-    // fixme setting tls as 1.3 causes an error
+    // setting tls as 1.3 causes fingerprint mismatch so force 1.2
     if (tlsVersion === CurlSslVersion.TlsV1_3) {
       tlsVersion = CurlSslVersion.TlsV1_2
     }
@@ -103,7 +103,7 @@ export function getCurlOptionsFromBrowserConfig(
 
   // CURLOPT_STREAM_WEIGHT is not supported (issue in node bindings?)
   // if (typeof config.http2StreamWeight === 'number') {
-  //     curlyOptions.STREAM_WEIGHT = config.http2StreamWeight;
+  //   curlOptions.STREAM_WEIGHT = config.http2StreamWeight;
   // }
 
   if (typeof config.http2WindowUpdate === 'number') {

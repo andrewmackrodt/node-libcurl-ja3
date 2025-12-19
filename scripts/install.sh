@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd -P)/.."
 
-CURL_IMPERSONATE_VERSION="0.9.4"
+CURL_IMPERSONATE_VERSION="1.2.5"
 
 # no action required if binding exists
 if [[ -f lib/binding/node_libcurl_ja3.node ]]; then
@@ -27,7 +27,7 @@ fetch_curl_impersonate_source() {
 }
 
 build_curl_impersonate() {
-  if [[ -f deps/curl-impersonate/build/lib/libcurl-impersonate-chrome.a ]]; then
+  if [[ "${CI:-}" != "true" ]] && [[ -f deps/curl-impersonate/build/curl-impersonate/lib/libcurl-impersonate.a ]]; then
     return
   fi
   scripts/build.sh

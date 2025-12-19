@@ -9,7 +9,7 @@ import { describe, beforeEach, afterEach, it, expect } from 'vitest'
 import { Curl, CurlCode, Easy } from '../../lib'
 import { withCommonTestOptions } from '../helper/commonOptions'
 
-const url = 'https://httpstat.us/200'
+const url = 'http://example.com/'
 
 // This is the only test that does not uses a express server
 // It makes a request to a live server, which can cause issues if there are network problems

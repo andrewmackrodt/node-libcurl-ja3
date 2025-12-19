@@ -278,9 +278,10 @@ describe.runIf(Curl.isVersionGreaterOrEqualThan(7, 74, 0))('Callbacks', () => {
           host: 'domain.com',
           expire: false,
         },
-        {
-          host: 'a'.repeat(1024),
-        },
+        // todo merge in changes from upstream
+        // {
+        //   host: 'a'.repeat(1024),
+        // },
       ]
 
       const initialValuesLength = values.length

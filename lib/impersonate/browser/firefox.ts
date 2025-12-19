@@ -5,7 +5,8 @@ import type { ImpersonateConfig, VariantImpersonateConfig } from '../types'
 export enum FirefoxBrowser {
   Firefox135 = 'firefox135',
   Firefox136 = 'firefox136',
-  Firefox = 'firefox136',
+  Firefox144 = 'firefox144',
+  Firefox = 'firefox144',
 }
 
 export const DEFAULT_FIREFOX_FINGERPRINT = {
@@ -15,7 +16,7 @@ export const DEFAULT_FIREFOX_FINGERPRINT = {
   keepExtensionOrder: true,
 }
 
-export const DEFAULT_FIREFOX_VERSION = '136.0'
+export const DEFAULT_FIREFOX_VERSION = '144.0'
 
 export function getFirefoxConfig(config?: VariantImpersonateConfig) {
   const version = config?.version ?? DEFAULT_FIREFOX_VERSION
@@ -56,5 +57,6 @@ export const FIREFOX_BROWSER_CONFIGS: Record<
   ImpersonateConfig
 > = {
   [FirefoxBrowser.Firefox135]: getFirefoxConfig({ version: '135.0' }),
-  [FirefoxBrowser.Firefox136]: getFirefoxConfig(),
+  [FirefoxBrowser.Firefox136]: getFirefoxConfig({ version: '136.0' }),
+  [FirefoxBrowser.Firefox144]: getFirefoxConfig(),
 }

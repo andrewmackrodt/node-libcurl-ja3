@@ -9,14 +9,18 @@ SRC_ARTIFACTS_FILE="$BUILD_DIR/curl-impersonate.src.tar.gz"
 BUILD_ARTIFACTS_FILE="$BUILD_DIR/curl-impersonate.tar.gz"
 OS=$(uname -s)
 
-BORINGSSL_COMMIT="23768dca563c4e62d48bb3675e49e34955dced12"
+BORINGSSL_COMMIT="673e61fc215b178a90c0e67858bbf162c8158993"
 BORINGSSL_SRC_DIR="$BUILD_DIR/boringssl-$BORINGSSL_COMMIT"
 
 BROTLI_VERSION="1.1.0"
 BROTLI_SRC_DIR="$BUILD_DIR/brotli-$BROTLI_VERSION"
 BROTLI_OUT_DIR="$BROTLI_SRC_DIR/out/installed"
 
-CURL_VERSION="8_7_1"
+CARES_VERSION="1.34.5"
+CARES_SRC_DIR="$BUILD_DIR/c-ares-$CARES_VERSION"
+CARES_OUT_DIR="$CARES_SRC_DIR/installed"
+
+CURL_VERSION="8_15_0"
 CURL_SRC_DIR="$BUILD_DIR/curl-$CURL_VERSION"
 CURL_OUT_DIR="$BUILD_DIR/curl-impersonate"
 
@@ -24,11 +28,19 @@ NGHTTP2_VERSION="1.63.0"
 NGHTTP2_SRC_DIR="$BUILD_DIR/nghttp2-$NGHTTP2_VERSION"
 NGHTTP2_OUT_DIR="$NGHTTP2_SRC_DIR/installed"
 
-ZLIB_VERSION="1.3"
+NGHTTP3_VERSION="1.9.0"
+NGHTTP3_SRC_DIR="$BUILD_DIR/nghttp3-$NGHTTP3_VERSION"
+NGHTTP3_OUT_DIR="$NGHTTP3_SRC_DIR/installed"
+
+NGTCP2_VERSION="1.11.0"
+NGTCP2_SRC_DIR="$BUILD_DIR/ngtcp2-$NGTCP2_VERSION"
+NGTCP2_OUT_DIR="$NGTCP2_SRC_DIR/installed"
+
+ZLIB_VERSION="1.3.1"
 ZLIB_SRC_DIR="$BUILD_DIR/zlib-$ZLIB_VERSION"
 ZLIB_OUT_DIR="$ZLIB_SRC_DIR/installed"
 
-ZSTD_VERSION="1.5.6"
+ZSTD_VERSION="1.5.7"
 ZSTD_SRC_DIR="$BUILD_DIR/zstd-$ZSTD_VERSION"
 ZSTD_OUT_DIR="$ZSTD_SRC_DIR/installed"
 
@@ -46,19 +58,14 @@ else
   exit 1
 fi
 
-# Build BoringSSL
-build_boringssl() {
-  $MAKE chrome-build
-}
-
 # Build zlib
 build_zlib() {
   if [[ ! -d "$ZLIB_SRC_DIR" ]]; then
-    curl -LO "https://zlib.net/fossils/zlib-$ZLIB_VERSION.tar.gz"
+    curl -LO "https://github.com/madler/zlib/releases/download/v$ZLIB_VERSION/zlib-$ZLIB_VERSION.tar.gz"
     tar xf "zlib-$ZLIB_VERSION.tar.gz"
   fi
   cd "$ZLIB_SRC_DIR"
-  CHOST=$HOST CFLAGS="-fPIC" ./configure --prefix="$ZLIB_OUT_DIR"
+  CHOST=$HOST ./configure --prefix="$ZLIB_OUT_DIR"
   make
   make install
   rm -f "$ZLIB_OUT_DIR/lib/libz.so"
@@ -106,6 +113,7 @@ configure_build() {
   cat "$CURL_IMPERSONATE_DIR/Makefile.in.bak" \
     | sed "s/-lc++/-l$CPP_LIB/" \
     | sed "s/-stdlib=libc++/-stdlib=lib$CPP_LIB/" \
+    | sed -E "s/CARES_VERSION := [0-9.]+/CARES_VERSION := $CARES_VERSION/" \
     | sed -E 's/(add_libs=.+)/\1\n\t  config_flags="$$config_flags '"${extra_config_flags[*]}"'"; \\/' \
     | tee "$CURL_IMPERSONATE_DIR/Makefile.in" >/dev/null
   "$CURL_IMPERSONATE_DIR/configure" --prefix="$CURL_OUT_DIR" \
@@ -117,9 +125,9 @@ configure_build() {
 
 # Build Curl Impersonate
 build_curl_impersonate() {
-  $MAKE chrome-build
-  $MAKE chrome-checkbuild
-  $MAKE chrome-install
+  $MAKE build
+  $MAKE checkbuild
+  $MAKE install
 
   # copy curl include dir
   mkdir -p "$CURL_OUT_DIR/include"
@@ -138,8 +146,11 @@ archive_build_sources() {
   git --work-tree="$tmpdir/curl-impersonate" checkout -fq HEAD
   unzip -q "boringssl-$BORINGSSL_COMMIT.zip" -d "$tmpdir/curl-impersonate/build"
   untar "brotli-$BROTLI_VERSION.tar.gz"
+  untar "c-ares-$CARES_VERSION.tar.gz"
   untar "curl-$CURL_VERSION.tar.gz"
   untar "nghttp2-$NGHTTP2_VERSION.tar.bz2"
+  untar "nghttp3-$NGHTTP3_VERSION.tar.bz2"
+  untar "ngtcp2-$NGTCP2_VERSION.tar.bz2"
   untar "zlib-$ZLIB_VERSION.tar.gz"
   untar "zstd-$ZSTD_VERSION.tar.gz"
   GZ_OPT=-9 tar zcf "$SRC_ARTIFACTS_FILE" -C "$tmpdir" curl-impersonate
@@ -155,8 +166,11 @@ archive_build_outputs() {
     "$(relpath "$BORINGSSL_SRC_DIR/include")" \
     "$(relpath "$BORINGSSL_SRC_DIR/lib")" \
     "$(relpath "$BROTLI_OUT_DIR/")" \
+    "$(relpath "$CARES_OUT_DIR/")" \
     "$(relpath "$CURL_OUT_DIR/")" \
     "$(relpath "$NGHTTP2_OUT_DIR/")" \
+    "$(relpath "$NGHTTP3_OUT_DIR/")" \
+    "$(relpath "$NGTCP2_OUT_DIR/")" \
     "$(relpath "$ZLIB_OUT_DIR/")" \
     "$(relpath "$ZSTD_OUT_DIR/")"
 }
@@ -169,6 +183,8 @@ main() {
   mkdir -p "$BUILD_DIR"
   cd "$BUILD_DIR"
 
+  export CFLAGS="-fPIC"
+
   # Build zlib
   echo "Building zlib..."
   build_zlib
@@ -180,10 +196,6 @@ main() {
   # Configure
   echo "Configuring build..."
   configure_build
-
-  # Build boringssl
-  echo "Building boringssl..."
-  build_boringssl
 
   # Build curl impersonate
   echo "Building Curl Impersonate..."

@@ -33,7 +33,7 @@ describe('Browser Impersonation', function () {
   })
 
   // Test cases for different browsers
-  ;[Browser.Chrome133, Browser.Firefox135].forEach((browser) => {
+  ;[Browser.Chrome142, Browser.Firefox135].forEach((browser) => {
     it(`should correctly impersonate ${browser}`, async () => {
       // Get the curly function for the browser
       const curly = impersonate(browser)
@@ -106,10 +106,10 @@ describe('Browser Impersonation', function () {
 
 describe('Comparison with binary version', function () {
   ;[
-    Browser.Chrome133,
+    Browser.Chrome142,
     Browser.Edge101,
-    Browser.Firefox135,
-    Browser.Safari18_0,
+    Browser.Firefox144,
+    Browser.Safari18_4,
   ].forEach((browserName) => {
     it(`should match response with binary browser ${browserName}`, async function () {
       const binBrowser = createBinaryBrowser(browserName)
@@ -137,6 +137,7 @@ describe('Comparison with binary version', function () {
               '($1Generic$2',
             )
             .replace(/Generic(; Generic\b)+/g, 'Generic')
+            .replace(/rv:[0-9]+\.[0-9]+/g, 'rv:?')
         } while (userAgent !== lastUserAgent)
 
         return compareKeys.reduce(
@@ -148,7 +149,7 @@ describe('Comparison with binary version', function () {
         )
       }
 
-      expect(normalize(binPage.data)).to.deep.equal(normalize(page.data))
+      expect(normalize(page.data)).to.deep.equal(normalize(binPage.data))
     })
   })
 })

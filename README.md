@@ -18,7 +18,7 @@ perform TLS and HTTP handshakes that are identical to that of a real browser.
 - Linux 64-bit (glibc based)
 - macOS Apple Silicon (M1+)
 
-Prebuilt binaries are provided for Node.js `20` and `22`. Any other version has not been tested and will need an
+Prebuilt binaries are provided for Node.js `20`, `22` and `24`. Any other version has not been tested and will need an
 environment capable of building the native module. Refer to [Important Notes on Prebuilt Binaries / Direct Installation](#important-notes-on-prebuilt-binaries--direct-installation)
 for a list of required system packages.
 
@@ -68,10 +68,10 @@ yarn add node-libcurl-ja3
 
 The following browser fingerprints are pre-configured:
 
-- Chrome 134
-- Edge 134
-- Firefox 136.0
-- Safari 18.3
+- Chrome 143
+- Edge 143
+- Firefox 144.0
+- Safari 18.6
 
 To learn how to configure custom impersonation options, refer to the folder [lib/impersonate/browser](./lib/impersonate/browser).
 
@@ -276,9 +276,9 @@ Installing with `yarn add node-libcurl-ja3` or `npm install node-libcurl-ja3` sh
 
 The prebuilt binary is statically built with the following library versions, features and protocols:
 ```
-Versions: libcurl/8.7.0-DEV BoringSSL zlib/1.3 brotli/1.1.0 zstd/1.5.6 nghttp2/1.63.0
+Versions: libcurl/8.15.0-IMPERSONATE BoringSSL zlib/1.3.1 brotli/1.1.0 zstd/1.5.7 c-ares/1.34.5 nghttp2/1.63.0 ngtcp2/1.11.0 nghttp3/1.9.0
 Protocols: dict file ftp ftps gopher gophers http https imap imaps ipfs ipns mqtt pop3 pop3s rtsp smb smbs smtp smtps telnet tftp ws wss
-Features: alt-svc AsynchDNS brotli HSTS HTTP2 HTTPS-proxy IPv6 Largefile libz NTLM SSL threadsafe UnixSockets zstd
+Features: alt-svc AsynchDNS brotli ECH HSTS HTTP2 HTTP3 HTTPS-proxy HTTPSRR IPv6 Largefile libz NTLM SSL SSLS-EXPORT threadsafe UnixSockets zstd
 ```
 
 If there is no prebuilt binary available that matches your system, or if the installation fails, then you will need an environment capable of compiling Node.js addons, which means:

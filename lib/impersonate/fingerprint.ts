@@ -38,7 +38,7 @@ const EXTENSION_CONFIG_MAPPING: Record<
     config.tlsSignedCertTimestamps = true
   },
   [CurlJa3Extension.TLSEXT_TYPE_encrypted_client_hello]: (config) => {
-    config.ech = 'GREASE'
+    config.ech = 'grease'
   },
 }
 

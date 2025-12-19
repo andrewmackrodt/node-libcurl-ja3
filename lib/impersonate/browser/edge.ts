@@ -2,32 +2,26 @@ import { CurlSslVersion } from '../../enum/CurlSslVersion'
 import { deepMerge, parseHeaders } from '../util'
 import type { ImpersonateConfig, VariantImpersonateConfig } from '../types'
 
-import {
-  DEFAULT_CHROME_FINGERPRINT,
-  DEFAULT_CHROME_VERSION,
-  getChromeConfig,
-} from './chrome'
+import { getChromeConfig } from './chrome'
 
 export enum EdgeBrowser {
   Edge101 = 'edge101',
-  Edge133 = 'edge133',
-  Edge134 = 'edge134',
-  Edge = 'edge134',
+  Edge142 = 'edge142',
+  Edge143 = 'edge143',
+  Edge = 'edge143',
 }
 
-export const DEFAULT_EDGE_FINGERPRINT = DEFAULT_CHROME_FINGERPRINT
-
-export const DEFAULT_EDGE_VERSION = DEFAULT_CHROME_VERSION
+export const DEFAULT_EDGE_VERSION = '143'
 
 export function getEdgeConfig(config?: VariantImpersonateConfig) {
-  const version = config?.version ?? DEFAULT_CHROME_VERSION
+  const version = config?.version ?? DEFAULT_EDGE_VERSION
 
   return getChromeConfig(
     deepMerge<VariantImpersonateConfig>(
       {
         override: {
           headers: parseHeaders([
-            `sec-ch-ua: "Not(A:Brand";v="99", "Microsoft Edge";v="${version}", "Chromium";v="${version}"`,
+            `sec-ch-ua: "Microsoft Edge";v="${version}", "Chromium";v="${version}", "Not A(Brand";v="24"`,
             `User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${version}.0.0.0 Safari/537.36 Edg/${version}.0.0.0`,
           ]),
           tlsUseNewAlpsCodepoint: false,
@@ -45,7 +39,7 @@ export const EDGE_BROWSER_CONFIGS: Record<EdgeBrowser, ImpersonateConfig> = {
       'TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256,ECDHE-ECDSA-AES128-GCM-SHA256,ECDHE-RSA-AES128-GCM-SHA256,ECDHE-ECDSA-AES256-GCM-SHA384,ECDHE-RSA-AES256-GCM-SHA384,ECDHE-ECDSA-CHACHA20-POLY1305,ECDHE-RSA-CHACHA20-POLY1305,ECDHE-RSA-AES128-SHA,ECDHE-RSA-AES256-SHA,AES128-GCM-SHA256,AES256-GCM-SHA384,AES128-SHA,AES256-SHA',
     compressed: true,
     headers: parseHeaders([
-      'sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="101", "Microsoft Edge";v="101"',
+      'sec-ch-ua: "Not A;Brand";v="99", "Chromium";v="101", "Microsoft Edge";v="101"',
       'sec-ch-ua-mobile: ?0',
       'sec-ch-ua-platform: "Windows"',
       'Upgrade-Insecure-Requests: 1',
@@ -67,6 +61,6 @@ export const EDGE_BROWSER_CONFIGS: Record<EdgeBrowser, ImpersonateConfig> = {
     tlsSignedCertTimestamps: true,
     tlsVersion: CurlSslVersion.TlsV1_2,
   },
-  [EdgeBrowser.Edge133]: getEdgeConfig({ version: '133' }),
-  [EdgeBrowser.Edge134]: getEdgeConfig(),
+  [EdgeBrowser.Edge142]: getEdgeConfig({ version: '142' }),
+  [EdgeBrowser.Edge143]: getEdgeConfig(),
 }
