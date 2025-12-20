@@ -1,6 +1,6 @@
 {
   "name": "node-libcurl-ja3",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Node.js native bindings for libcurl-impersonate. Impersonate Chrome, Edge, Firefox and Safari TLS fingerprints.",
   "keywords": [
     "boringssl",
