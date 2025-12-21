@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.2.1] - Unreleased
+
+### Fixed
+- Added `curly` response property `info` when returning a stream response
+
 ## [5.2.0] - 2025-12-21
 
 ### Breaking Change
@@ -483,6 +488,7 @@ Special Thanks to [@koskokos2](https://github.com/koskokos2) for their contribut
 - Improved code style, started using prettier
 ## [1.2.0] - 2017-08-28
 
+[5.2.1]: https://github.com/andrewmackrodt/node-libcurl-ja3/compare/v5.2.0...HEAD
 [5.2.0]: https://github.com/andrewmackrodt/node-libcurl-ja3/compare/v5.1.1...v5.2.0
 [5.1.1]: https://github.com/andrewmackrodt/node-libcurl-ja3/compare/v5.1.0...v5.1.1
 [5.1.0]: https://github.com/andrewmackrodt/node-libcurl-ja3/compare/v5.0.3...v5.1.0

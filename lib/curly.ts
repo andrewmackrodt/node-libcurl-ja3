@@ -25,6 +25,10 @@ import {
   getCurlOptionsFromBrowserConfig,
 } from './impersonate'
 
+export type CurlyGetInfoReturn = Partial<
+  Record<keyof CurlInfo, string[] | string | number>
+>
+
 /**
  * Object the curly call resolves to.
  *
@@ -51,7 +55,7 @@ export interface CurlyResult<ResultData = any> {
   /**
    * Connection information
    */
-  info: Partial<Record<keyof CurlInfo, unknown>>
+  info: CurlyGetInfoReturn
 }
 
 // This is basically http.METHODS
@@ -311,6 +315,16 @@ export function impersonate(
   return create(options)
 }
 
+function getInfo(curlHandle: Curl): CurlyGetInfoReturn {
+  const info: CurlyGetInfoReturn = {}
+  for (const [name, id] of Object.entries(Curl.info).sort(([a], [b]) =>
+    a.localeCompare(b),
+  )) {
+    info[name as keyof CurlInfo] = curlHandle.getInfo(id)
+  }
+  return info
+}
+
 export const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
   function curly<ResultData>(
     url: string,
@@ -395,7 +409,6 @@ export const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
         }
       }
     }
-
     return new Promise((resolve, reject) => {
       let stream: Readable
 
@@ -407,11 +420,14 @@ export const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
 
             stream = _stream
 
+            const info = options.curlyGetInfo ? getInfo(curlHandle) : {}
+
             resolve({
               // @ts-ignore cannot be subtype yada yada
               data: stream,
               statusCode,
               headers,
+              info,
             })
           },
         )
@@ -420,14 +436,7 @@ export const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
       curlHandle.on(
         'end',
         (statusCode, data: Buffer, headers: HeaderInfo[]) => {
-          const info: Partial<Record<keyof CurlInfo, unknown>> = {}
-          if (options.curlyGetInfo) {
-            for (const [name, id] of Object.entries(Curl.info).sort(
-              ([a], [b]) => a.localeCompare(b),
-            )) {
-              info[name as keyof CurlInfo] = curlHandle.getInfo(id)
-            }
-          }
+          const info = options.curlyGetInfo ? getInfo(curlHandle) : {}
 
           curlHandle.close()
 
