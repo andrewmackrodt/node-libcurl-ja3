@@ -6,12 +6,12 @@ const getDescriptionCommentForOption = (option) =>
 /**
  * ${option.description.trim()}
  * 
- * Official libcurl documentation: : [${option.url}](${option.url})
+ * @Link [\`${option.constantOriginal}\`](${option.url})
  */
 `
     : `
 /**
- * Official libcurl documentation: : [${option.url}](${option.url})
+ * @Link [\`${option.constantOriginal}\`](${option.url})
  */
 `
 

@@ -16,6 +16,7 @@ import { HeaderInfo } from './parseHeaders'
 
 import { Curl } from './Curl'
 import { CurlFeature } from './enum/CurlFeature'
+import type { CurlInfo } from './generated/CurlInfo'
 
 import {
   type Browser,
@@ -46,6 +47,11 @@ export interface CurlyResult<ResultData = any> {
    * HTTP Status code for the last request
    */
   statusCode: number
+
+  /**
+   * Connection information
+   */
+  info: Partial<Record<keyof CurlInfo, unknown>>
 }
 
 // This is basically http.METHODS
@@ -211,6 +217,12 @@ export interface CurlyOptions extends CurlOptionValueType {
    * method in the internal {@link "Curl".Curl | `Curl`} instance.
    */
   curlyStreamUpload?: Readable | null
+
+  /**
+   * Calls {@link "Curl".Curl.getInfo | `Curl#getInfo`} method in the internal
+   * {@link "Curl".Curl | `Curl`} instance and populates the `info` object.
+   */
+  curlyGetInfo?: boolean
 }
 
 interface CurlyHttpMethodCall {
@@ -408,6 +420,15 @@ export const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
       curlHandle.on(
         'end',
         (statusCode, data: Buffer, headers: HeaderInfo[]) => {
+          const info: Partial<Record<keyof CurlInfo, unknown>> = {}
+          if (options.curlyGetInfo) {
+            for (const [name, id] of Object.entries(Curl.info).sort(
+              ([a], [b]) => a.localeCompare(b),
+            )) {
+              info[name as keyof CurlInfo] = curlHandle.getInfo(id)
+            }
+          }
+
           curlHandle.close()
 
           // only need to the remaining here if we did not enabled
@@ -488,6 +509,7 @@ export const create = (defaultOptions: CurlyOptions = {}): CurlyFunction => {
               statusCode: statusCode,
               data: foundParser ? foundParser(data, headers) : data,
               headers: headers,
+              info: info,
             })
           } catch (error) {
             reject(error)

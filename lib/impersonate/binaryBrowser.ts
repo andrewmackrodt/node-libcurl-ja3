@@ -146,6 +146,7 @@ export function create(browser: Browser): CurlyFunction {
             statusCode: response.StatusCode,
             headers: headers,
             data: body,
+            info: {},
           }
           resolve(result)
         })
