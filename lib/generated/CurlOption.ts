@@ -5718,14 +5718,14 @@ export type CurlOptionValueType = {
    *
    * @Link [`CURLOPT_HTTPBASEHEADER`](https://github.com/lexiforest/curl-impersonate/blob/2447279b1a388ba907f4bfe4fe02aadd1dc24376/patches/curl.patch#L111)
    */
-  HTTPBASEHEADER?: string | number | boolean | null
+  HTTPBASEHEADER?: string[]
 
   /**
    * curl-impersonate: A list of headers used by the impersonated browser. If given, merged with CURLOPT_HTTPHEADER.
    *
    * @Link [`CURLOPT_HTTPBASEHEADER`](https://github.com/lexiforest/curl-impersonate/blob/2447279b1a388ba907f4bfe4fe02aadd1dc24376/patches/curl.patch#L111)
    */
-  httpBaseHeader?: string | number | boolean | null
+  httpBaseHeader?: string[]
 
   /**
    * Do an HTTP GET request.

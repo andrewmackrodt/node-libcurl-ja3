@@ -46,14 +46,16 @@ export function getCurlOptionsFromBrowser(
 export function getCurlOptionsFromBrowserConfig(
   config: ImpersonateConfig,
 ): CurlOptionValueType {
-  const headersList = Object.entries(config.headers).map(
-    ([key, value]) => `${key}: ${value}`,
-  )
+  const curlOptions: CurlOptionValueType = { TLS_STATUS_REQUEST: 1 }
 
-  const curlOptions: CurlOptionValueType = {
-    HTTPHEADER: headersList,
-    TLS_STATUS_REQUEST: 1,
-  }
+  const headersList = Object.entries(config.headers).map(([key, value]) => {
+    if (key.toLowerCase() === 'user-agent') {
+      curlOptions.USERAGENT = value
+    }
+    return `${key}: ${value}`
+  })
+
+  curlOptions.HTTPBASEHEADER = headersList
 
   if (config.tlsVersion) {
     let tlsVersion = config.tlsVersion
